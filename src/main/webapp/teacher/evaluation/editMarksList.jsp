@@ -91,7 +91,7 @@
 
 				<h:outputText value="<p>" escape="false"/>
 					<h:outputText value="<p>" escape="false"/>
-						<h:outputText value='<a href="#{facesContext.externalContext.requestContextPath}/teacher/submitGrades/#{evaluationManagementBackingBean.executionCourse.externalId}/#{evaluationManagementBackingBean.evaluation.externalId}">#{bundle["label.load.marks"]}</a>' escape="false"/>
+						<h:outputText value='<a href="#{facesContext.externalContext.requestContextPath}/teacher/evaluation/#{evaluationManagementBackingBean.executionCourse.externalId}/#{evaluationManagementBackingBean.evaluation.externalId}">#{bundle["label.load.marks"]}</a>' escape="false"/>
 					<h:outputText value="</p>" escape="false"/>
 					<h:commandLink action="enterLoadMarks">
 						<f:param name="evaluationIDHidden" value="#{evaluationManagementBackingBean.evaluation.externalId}" />

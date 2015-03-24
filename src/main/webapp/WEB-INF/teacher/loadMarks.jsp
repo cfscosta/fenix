@@ -29,6 +29,7 @@
 <p>
 	<h3>${executionCourse.nome}</h3>
 </p>
+<p>
 <c:if test="${evaluation.getClass().name == 'org.fenixedu.academic.domain.WrittenTest'}">
 	<spring:message code="label.written.test"/>:
 	<b>${evaluation.description}</b>
@@ -43,22 +44,22 @@
 	<spring:message code="label.at"/>
 	<fmt:formatDate pattern="HH:mm" value="${evaluation.beginningDate}"/>
 </c:if>
-
+</p>
 <div class="alert alert-info" role="alert">
-<spring:message code="label.fileUpload.information"/>
-<c:if test="${!empty evaluation.gradeScale}">
-	<c:set var="gradeScaleDescription" value="${evaluation.gradeScale.getPossibleValueDescription(evaluation.isFinal())}"/>
-	<p><b><spring:message code="label.marksOnline.currentGradeScale"/></b> ${gradeScaleDescription}</p>
-</c:if>
+	<spring:message code="label.fileUpload.information"/>
+	<c:if test="${!empty evaluation.gradeScale}">
+		<c:set var="gradeScaleDescription" value="${evaluation.gradeScale.getPossibleValueDescription(evaluation.isFinal())}"/>
+		<p><b><spring:message code="label.marksOnline.currentGradeScale"/></b> ${gradeScaleDescription}</p>
+	</c:if>
 </div>
-<form>
-<div class="form-group">
-<label for="theFile"><spring:message code="label.file"/></label>
-<input type="file" name="theFile" id="theFile">
-</div>
-<button type="button" class="btn btn-primary"><spring:message code="button.send"/></button>
-<button type="button" class="btn btn-default"><spring:message code="button.cancel"/></button>
-</form>
+<form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}" enctype="multipart/form-data">
+	<div class="form-group">
+		<form:label for="gradeFile" path="blueprintMultipartFile"><spring:message code="label.file"/></form:label>
+		<form:input type="file" class="form-control" id="gradeFile" path="gradeFile"/>
+	</div>
+	<button type="button" class="btn btn-primary"><spring:message code="button.send"/></button>
+	<button type="button" class="btn btn-default"><spring:message code="button.cancel"/></button>
+</form:form>
 
 </div>
 </div>
