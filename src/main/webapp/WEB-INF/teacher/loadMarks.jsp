@@ -22,6 +22,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
 <spring:url var="searchUrl" value="/spaces-view/search/"/>
 <jsp:include page="/teacher/evaluation/evaluationMenu.jsp" />
@@ -52,13 +53,13 @@
 		<p><b><spring:message code="label.marksOnline.currentGradeScale"/></b> ${gradeScaleDescription}</p>
 	</c:if>
 </div>
+<spring:url var="formActionUrl" value="${action}"/>
 <form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}" enctype="multipart/form-data">
 	<div class="form-group">
-		<form:label for="gradeFile" path="blueprintMultipartFile"><spring:message code="label.file"/></form:label>
-		<form:input type="file" class="form-control" id="gradeFile" path="gradeFile"/>
+		<form:label for="gradeFile" path="gradeFile"><spring:message code="label.file"/></form:label>
+		<form:input type="file" id="gradeFile" path="gradeFile" name="gradeFile"></form:input>
 	</div>
-	<button type="button" class="btn btn-primary"><spring:message code="button.send"/></button>
-	<button type="button" class="btn btn-default"><spring:message code="button.cancel"/></button>
+	<input type="submit" class="btn btn-default">
 </form:form>
 
 </div>

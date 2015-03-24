@@ -29,6 +29,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.ws.rs.core.UriBuilder;
+
 import org.fenixedu.academic.domain.Evaluation;
 import org.fenixedu.academic.domain.Professorship;
 import org.fenixedu.academic.domain.exceptions.DomainException;
@@ -49,6 +53,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 
+import pt.ist.fenixWebFramework.servlets.filters.contentRewrite.GenericChecksumRewriter;
+
 @Controller
 @RequestMapping("/teacher/evaluation/{executionCourse}/{evaluation}")
 public class SubmitGradeController extends ExecutionCourseController {
@@ -68,6 +74,7 @@ public class SubmitGradeController extends ExecutionCourseController {
     public String home(Model model) {
         model.addAttribute("executionCourse", executionCourse);
         model.addAttribute("evaluation", evaluation);
+        model.addAttribute("gradeBean", new SubmitGradeBean());
         model.addAttribute("action", "/teacher/evaluation/" + executionCourse.getExternalId() + "/" + evaluation.getExternalId()
                 + "/submitGradeFile");
         return "teacher/loadMarks";
@@ -170,9 +177,15 @@ public class SubmitGradeController extends ExecutionCourseController {
 
     @RequestMapping(value = "/submitGradeFile", method = RequestMethod.POST)
     public RedirectView submitGrades(Model model, @ModelAttribute("gradeBean") @Validated SubmitGradeBean gradeFileBean,
-            BindingResult bindingResult) {
+            BindingResult bindingResult, HttpSession session, HttpServletRequest request) {
         loadMarks(gradeFileBean);
-        return null;
+        String sendEmailUrl =
+                UriBuilder.fromUri("/teacher/evaluation/editMarksList.faces")
+                        .queryParam("executionCourseID", executionCourse.getExternalId())
+                        .queryParam("evaluationID", evaluation.getExternalId()).build().toString();
+        String sendEmailWithChecksumUrl =
+                GenericChecksumRewriter.injectChecksumInUrl(request.getContextPath(), sendEmailUrl, session);
+        return new RedirectView(sendEmailWithChecksumUrl, true);
     }
 //
 //    @RequestMapping(value = "/sendEmail/{studentGroup}", method = RequestMethod.GET)
