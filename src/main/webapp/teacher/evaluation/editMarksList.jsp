@@ -93,13 +93,6 @@
 					<h:outputText value="<p>" escape="false"/>
 						<h:outputText value='<a href="#{facesContext.externalContext.requestContextPath}/teacher/evaluation/#{evaluationManagementBackingBean.executionCourse.externalId}/#{evaluationManagementBackingBean.evaluation.externalId}">#{bundle["label.load.marks"]}</a>' escape="false"/>
 					<h:outputText value="</p>" escape="false"/>
-					<h:commandLink action="enterLoadMarks">
-						<f:param name="evaluationIDHidden" value="#{evaluationManagementBackingBean.evaluation.externalId}" />
-						<f:param name="executionCourseIDHidden" value="#{evaluationManagementBackingBean.executionCourse.externalId}" />
-						<f:param name="evaluationID" value="#{evaluationManagementBackingBean.evaluation.externalId}" />
-						<f:param name="executionCourseID" value="#{evaluationManagementBackingBean.executionCourse.externalId}" />
-						<h:outputFormat value="#{bundle['label.load.marks']}" />
-					</h:commandLink>
 				<h:outputText value="</p>" escape="false"/>
 			<h:outputText value="</div>" escape="false"/>
 
