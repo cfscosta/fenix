@@ -35,9 +35,7 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.fenixedu.academic.domain.Evaluation;
 import org.fenixedu.academic.domain.Professorship;
-import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.service.services.exceptions.FenixServiceException;
-import org.fenixedu.academic.service.services.exceptions.FenixServiceMultipleException;
 import org.fenixedu.academic.service.services.teacher.WriteMarks;
 import org.fenixedu.academic.service.services.teacher.WriteMarks.StudentMark;
 import org.fenixedu.academic.ui.struts.action.teacher.ManageExecutionCourseDA;
@@ -132,30 +130,18 @@ public class SubmitGradeController extends ExecutionCourseController {
         return null;
     }
 
-    public boolean loadMarks(SubmitGradeBean gradeFileBean) {
+    public Map<String, String> loadMarks(SubmitGradeBean gradeFileBean) {
 
         final MultipartFile fileItem = gradeFileBean.getGradeFile();
         InputStream inputStream = null;
         try {
             inputStream = fileItem.getInputStream();
             final Map<String, String> marks = loadMarks(inputStream);
-
-            WriteMarks.writeByStudent(executionCourse.getExternalId(), evaluation.getExternalId(), buildStudentMarks(marks));
-
-            return true;
-
-        } catch (FenixServiceMultipleException e) {
-            for (DomainException domainException : e.getExceptionList()) {
-                //addErrorMessage(BundleUtil.getString(Bundle.APPLICATION, domainException.getKey(), domainException.getArgs()));
-            }
-            return false;
+            return marks;
+            //WriteMarks.writeByStudent(executionCourse.getExternalId(), evaluation.getExternalId(), buildStudentMarks(marks));
         } catch (IOException e) {
             //addErrorMessage(BundleUtil.getString(Bundle.APPLICATION, e.getMessage()));
-            return false;
-        } catch (FenixServiceException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return false;
+            return null;
         } finally {
             if (inputStream != null) {
                 try {
@@ -175,17 +161,37 @@ public class SubmitGradeController extends ExecutionCourseController {
         return result;
     }
 
-    @RequestMapping(value = "/submitGradeFile", method = RequestMethod.POST)
-    public RedirectView submitGrades(Model model, @ModelAttribute("gradeBean") @Validated SubmitGradeBean gradeFileBean,
+    @RequestMapping(value = "/submitVerified", method = RequestMethod.POST)
+    private RedirectView sibmitVerified(Model model, @ModelAttribute("gradeBean") @Validated SubmitGradeBean gradeFileBean,
             BindingResult bindingResult, HttpSession session, HttpServletRequest request) {
-        loadMarks(gradeFileBean);
-        String sendEmailUrl =
+
+        try {
+            WriteMarks.writeByStudent(executionCourse.getExternalId(), evaluation.getExternalId(),
+                    buildStudentMarks(gradeFileBean.getMarks()));
+        } catch (FenixServiceException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        String editMarksListUrl =
                 UriBuilder.fromUri("/teacher/evaluation/editMarksList.faces")
                         .queryParam("executionCourseID", executionCourse.getExternalId())
                         .queryParam("evaluationID", evaluation.getExternalId()).build().toString();
         String sendEmailWithChecksumUrl =
-                GenericChecksumRewriter.injectChecksumInUrl(request.getContextPath(), sendEmailUrl, session);
+                GenericChecksumRewriter.injectChecksumInUrl(request.getContextPath(), editMarksListUrl, session);
         return new RedirectView(sendEmailWithChecksumUrl, true);
+    }
+
+    @RequestMapping(value = "/submitGradeFile", method = RequestMethod.POST)
+    public String submitGrades(Model model, @ModelAttribute("gradeBean") @Validated SubmitGradeBean gradeFileBean,
+            BindingResult bindingResult, HttpSession session, HttpServletRequest request) {
+        Map<String, String> marks = loadMarks(gradeFileBean);
+        gradeFileBean.setMarks(marks);
+        model.addAttribute("gradeBean", gradeFileBean);
+        model.addAttribute("executionCourse", executionCourse);
+        model.addAttribute("evaluation", evaluation);
+        model.addAttribute("action", "/teacher/evaluation/" + executionCourse.getExternalId() + "/" + evaluation.getExternalId()
+                + "/submitVerified");
+        return "teacher/previewMarks";
     }
 //
 //    @RequestMapping(value = "/sendEmail/{studentGroup}", method = RequestMethod.GET)

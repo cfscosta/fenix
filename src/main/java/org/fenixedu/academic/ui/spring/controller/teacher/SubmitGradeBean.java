@@ -18,15 +18,20 @@
  */
 package org.fenixedu.academic.ui.spring.controller.teacher;
 
+import java.io.Serializable;
+import java.util.Map;
+
 import org.fenixedu.academic.domain.Evaluation;
 import org.fenixedu.academic.domain.ExecutionCourse;
 import org.springframework.web.multipart.MultipartFile;
 
-public class SubmitGradeBean {
+public class SubmitGradeBean implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     Evaluation evaluation;
     ExecutionCourse executionCourse;
     MultipartFile gradeFile;
+    Map<String, String> marks;
 
     public Evaluation getEvaluation() {
         return evaluation;
@@ -50,6 +55,14 @@ public class SubmitGradeBean {
 
     public void setGradeFile(MultipartFile gradeFile) {
         this.gradeFile = gradeFile;
+    }
+
+    public Map<String, String> getMarks() {
+        return marks;
+    }
+
+    public void setMarks(Map<String, String> marks) {
+        this.marks = marks;
     }
 
 }
