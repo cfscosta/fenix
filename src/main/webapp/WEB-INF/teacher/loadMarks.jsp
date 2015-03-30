@@ -53,8 +53,16 @@
 		<p><b><spring:message code="label.marksOnline.currentGradeScale"/></b> ${gradeScaleDescription}</p>
 	</c:if>
 </div>
-<spring:url var="formActionUrl" value="${action}"/>
-<form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}" enctype="multipart/form-data">
+<spring:url var="formActionUrl" value="${action}"/>txt
+<form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}TXT" enctype="multipart/form-data">
+	<div class="form-group">
+		<form:label for="gradeFile" path="gradeFile"><spring:message code="label.file"/></form:label>
+		<form:input type="file" id="gradeFile" path="gradeFile" name="gradeFile"></form:input>
+	</div>
+	<input type="submit" class="btn btn-default">
+</form:form>
+<spring:url var="formActionUrl" value="${action}"/>xls
+<form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}Excel" enctype="multipart/form-data">
 	<div class="form-group">
 		<form:label for="gradeFile" path="gradeFile"><spring:message code="label.file"/></form:label>
 		<form:input type="file" id="gradeFile" path="gradeFile" name="gradeFile"></form:input>

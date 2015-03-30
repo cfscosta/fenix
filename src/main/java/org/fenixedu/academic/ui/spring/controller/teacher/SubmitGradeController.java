@@ -33,6 +33,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.fenixedu.academic.domain.Evaluation;
 import org.fenixedu.academic.domain.Professorship;
 import org.fenixedu.academic.service.services.exceptions.FenixServiceException;
@@ -52,6 +58,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 
 import pt.ist.fenixWebFramework.servlets.filters.contentRewrite.GenericChecksumRewriter;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 @Controller
 @RequestMapping("/teacher/evaluation/{executionCourse}/{evaluation}")
@@ -140,6 +149,7 @@ public class SubmitGradeController extends ExecutionCourseController {
             return marks;
             //WriteMarks.writeByStudent(executionCourse.getExternalId(), evaluation.getExternalId(), buildStudentMarks(marks));
         } catch (IOException e) {
+            e.printStackTrace();
             //addErrorMessage(BundleUtil.getString(Bundle.APPLICATION, e.getMessage()));
             return null;
         } finally {
@@ -147,7 +157,7 @@ public class SubmitGradeController extends ExecutionCourseController {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-
+                    e.printStackTrace();
                 }
             }
         }
@@ -181,10 +191,70 @@ public class SubmitGradeController extends ExecutionCourseController {
         return new RedirectView(sendEmailWithChecksumUrl, true);
     }
 
-    @RequestMapping(value = "/submitGradeFile", method = RequestMethod.POST)
-    public String submitGrades(Model model, @ModelAttribute("gradeBean") @Validated SubmitGradeBean gradeFileBean,
+    @RequestMapping(value = "/submitGradeFileExcel", method = RequestMethod.POST)
+    public String submitGradesExcel(Model model, @ModelAttribute("gradeBean") @Validated SubmitGradeBean gradeFileBean,
+            BindingResult bindingResult, HttpSession session, HttpServletRequest request) {
+        JsonElement fileAsStrings = processExcelMarks(gradeFileBean);
+
+        //gradeFileBean.setMarks(marks);
+        model.addAttribute("excelRepresent", fileAsStrings.toString());
+        model.addAttribute("gradeBean", gradeFileBean);
+        model.addAttribute("executionCourse", executionCourse);
+        model.addAttribute("evaluation", evaluation);
+        model.addAttribute("action", "/teacher/evaluation/" + executionCourse.getExternalId() + "/" + evaluation.getExternalId()
+                + "/submitVerified");
+        return "teacher/selectMarks";
+    }
+
+    private JsonElement processExcelMarks(SubmitGradeBean gradeFileBean) {
+        JsonObject MapOfMaps = new JsonObject();
+        try {
+            InputStream inp = gradeFileBean.getGradeFile().getInputStream();
+            Workbook wb = null;
+            wb = WorkbookFactory.create(inp);
+            Sheet sheet = wb.getSheetAt(0);
+            Row titleRow = sheet.getRow(0);
+            for (int titles = 1; titles < titleRow.getLastCellNum(); titles++) {
+                JsonObject StudentToGrade = new JsonObject();
+                for (int i = 1; i < sheet.getLastRowNum(); i++) {
+                    Row row = sheet.getRow(i);
+                    StudentToGrade.addProperty(getCellStringValue(row.getCell(0)), getCellStringValue(row.getCell(titles)));
+                }
+                MapOfMaps.add(getCellStringValue(titleRow.getCell(titles)), StudentToGrade);
+            }
+        } catch (IOException | InvalidFormatException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return MapOfMaps;
+    }
+
+    private String getCellStringValue(Cell cell) {
+        int type = cell.getCellType();
+        if (type == Cell.CELL_TYPE_FORMULA) {
+            type = cell.getCachedFormulaResultType();
+        }
+        switch (type) {
+        case Cell.CELL_TYPE_NUMERIC: {
+            return "" + (int) cell.getNumericCellValue();
+        }
+        case Cell.CELL_TYPE_STRING: {
+            return "" + cell.getStringCellValue();
+        }
+        case Cell.CELL_TYPE_BOOLEAN: {
+            return "" + cell.getBooleanCellValue();
+        }
+        case Cell.CELL_TYPE_ERROR:
+        case Cell.CELL_TYPE_BLANK:
+        }
+        return "";
+    }
+
+    @RequestMapping(value = "/submitGradeFileTXT", method = RequestMethod.POST)
+    public String submitGradesTXT(Model model, @ModelAttribute("gradeBean") @Validated SubmitGradeBean gradeFileBean,
             BindingResult bindingResult, HttpSession session, HttpServletRequest request) {
         Map<String, String> marks = loadMarks(gradeFileBean);
+
         gradeFileBean.setMarks(marks);
         model.addAttribute("gradeBean", gradeFileBean);
         model.addAttribute("executionCourse", executionCourse);
@@ -193,29 +263,15 @@ public class SubmitGradeController extends ExecutionCourseController {
                 + "/submitVerified");
         return "teacher/previewMarks";
     }
-//
-//    @RequestMapping(value = "/sendEmail/{studentGroup}", method = RequestMethod.GET)
-//    public RedirectView sendEmail(Model model, HttpServletRequest request, HttpSession session,
-//            @PathVariable StudentGroup studentGroup) {
-//        String label =
-//                studentGroup.getGrouping().getName() + "-" + BundleUtil.getString(Bundle.APPLICATION, "label.group")
-//                        + studentGroup.getGroupNumber();
-//
-//        ArrayList<Recipient> recipients = new ArrayList<Recipient>();
-//        recipients.add(Recipient.newInstance(
-//                label,
-//                UserGroup.of(studentGroup.getAttendsSet().stream().map(Attends::getRegistration).map(Registration::getPerson)
-//                        .map(Person::getUser).collect(Collectors.toSet()))));
-//        String sendEmailUrl =
-//                UriBuilder
-//                        .fromUri("/messaging/emails.do")
-//                        .queryParam("method", "newEmail")
-//                        .queryParam("sender", ExecutionCourseSender.newInstance(executionCourse).getExternalId())
-//                        .queryParam("recipient", recipients.stream().filter(r -> r != null).map(r -> r.getExternalId()).toArray())
-//                        .build().toString();
-//        String sendEmailWithChecksumUrl =
-//                GenericChecksumRewriter.injectChecksumInUrl(request.getContextPath(), sendEmailUrl, session);
-//        return new RedirectView(sendEmailWithChecksumUrl, true);
-//
+
+//    private boolean isExcelFile(MultipartFile gradeFile) {
+//        if (gradeFile.getContentType().contains("excel")) {
+//            return true;
+//        }
+//        if (gradeFile.getContentType().contains("sheet")) {
+//            return true;
+//        }
+//        return false;
 //    }
+
 }
