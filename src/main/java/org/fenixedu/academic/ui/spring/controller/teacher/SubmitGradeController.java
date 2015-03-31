@@ -230,6 +230,9 @@ public class SubmitGradeController extends ExecutionCourseController {
     }
 
     private String getCellStringValue(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
         int type = cell.getCellType();
         if (type == Cell.CELL_TYPE_FORMULA) {
             type = cell.getCachedFormulaResultType();

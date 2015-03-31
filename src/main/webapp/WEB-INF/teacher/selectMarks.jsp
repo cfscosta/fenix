@@ -29,6 +29,21 @@
 <script src="${jsxtransformUrl}"></script>
 <spring:url var="searchUrl" value="/spaces-view/search/"/>
 <jsp:include page="/teacher/evaluation/evaluationMenu.jsp" />
+
+${portal.toolkit()}
+<style>
+.input-md {
+height: 25px;
+padding: 10px 16px;
+}
+
+.limit-length {
+	height: 300px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+</style>
+
 <h2><spring:message code="title.evaluation.manage.marksListWithFile"/></h2>
 <p>
 	<h3>${executionCourse.nome}</h3>
@@ -105,15 +120,47 @@ if (!Object.keys) {
 
 var Grade = React.createClass({
   render: function() {
+	var marksName = "marks['"+this.props.author+"']";
+	var error = ""+this.state.data.error;
     return (
 	  <div className="row">
-	  	<div className="col-md-1">{this.props.author}</div>
-      	<div className="col-md-1">{this.props.info}</div>
+	  	<div className="col-md-6 input-md">{this.props.author}</div>
+      	<div className="col-md-6 input-md">{this.props.info}</div>
+		<input type="hidden" name={marksName} value={this.props.info}/>
 	  </div>
     );
+  },
+  
+  getInitialState: function() {
+    return {data: {error: true}};
+  },
+
+  componentDidMount: function() {
+	var getUrl = Bennu.contextPath + "/api/bennu-core/users/find?query="+this.props.author;
+	var username = this.props.author;
+	var verifyUser = function(array){
+	  for(var i = 0; i< array.length;i++){
+        if(array[i].username != undefined && array[i].username === username){
+		  return true;
+	    }
+      }
+      return false; 
+    };
+
+    $.ajax({
+      url: Bennu.contextPath + "/api/bennu-core/users/find?query="+this.props.author,
+      dataType: 'json',
+      type: 'POST',
+      success: function(data) {
+		if(data.users != undefined && !verifyUser(data.users)){
+			this.setState({data: {error:false}});
+        }
+      }.bind(this),
+      error: function(xhr, status, err) {
+      }.bind(this)
+    });
   }
 });
-
 
 var GradeBox = React.createClass({
 
@@ -153,16 +200,18 @@ var GradeList = React.createClass({
       );
     });
     return (
-      <div className="gradeList">
+	  <div className="col-md-8">
+	  <div className="row">
+		<div className="col-md-6">Student</div>
+		<div className="col-md-6">Grade</div>
+	  </div>
+	  <div className="limit-length">
         {gradeNodes}
+      </div>
       </div>
     );
   }
 });
-
-
-
-
 
 var onChange = function () {
 	var selectedValue = document.getElementById('asd').value;
@@ -215,35 +264,25 @@ var SelectTest = React.createClass({
 var datas = ${excelRepresent};
 var testes = Object.keys(datas);
 
-var t1 =  datas['t1'];
+
 React.render(
   <SelectTest data={testes}/>,
   document.getElementById('content')
 );
-
+if(testes.length >0){
+var t1 =  datas[testes[0]];
 React.render(
   <GradeBox data={t1}/>,
   document.getElementById('content')
 );
-
+}
 </script>
 
-<div class="row">
-	<div class="col-md-3">Username</div>
-	<div class="col-md-3">Nota</div>
-</div>
 <form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}" enctype="multipart/form-data">
-	<c:forEach var="mark" items="${gradeBean.marks}">
-		<div class="row">
-			<div class="col-md-3">${mark.key}</div>
-			<div class="col-md-3">${mark.value}</div>
-			<form:input type="hidden" path="marks['${mark.key}']" value="${mark.value}"/>
-		</div>
-	</c:forEach>
+	<div id="content" class="container"></div>
 	<button type="submit" class="btn btn-default">Submeter</button>
 </form:form>
-<div id="content">
-<selectTest data="testes"/>
+
 </div>
 </div>
 </div>
