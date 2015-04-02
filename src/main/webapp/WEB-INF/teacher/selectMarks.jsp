@@ -33,13 +33,13 @@
 ${portal.toolkit()}
 <style>
 .input-md {
-height: 25px;
-padding: 10px 16px;
+	height: 25px;
+	padding: 10px 16px;
 }
 
 .limit-length {
-	height: 300px;
-	overflow-y: scroll;
+	max-height: 300px;
+	overflow-y: auto;
 	overflow-x: hidden;
 }
 </style>
@@ -124,8 +124,8 @@ var Grade = React.createClass({
 	var error = ""+this.state.data.error;
     return (
 	  <div className="row">
-	  	<div className="col-md-6 input-md">{this.props.author}</div>
-      	<div className="col-md-6 input-md">{this.props.info}</div>
+	  	<div className="col-md-6 input-md col-xs-6">{this.props.author}</div>
+      	<div className="col-md-6 input-md col-xs-6">{this.props.info}</div>
 		<input type="hidden" name={marksName} value={this.props.info}/>
 	  </div>
     );
@@ -200,21 +200,21 @@ var GradeList = React.createClass({
       );
     });
     return (
-	  <div className="col-md-8">
+	  <div>
 	  <div className="row">
-		<div className="col-md-6">Student</div>
-		<div className="col-md-6">Grade</div>
+		<div className="col-md-6 col-xs-6">Student</div>
+		<div className="col-md-6 col-xs-6">Grade</div>
 	  </div>
 	  <div className="limit-length">
         {gradeNodes}
       </div>
       </div>
     );
-  }
+  },
 });
 
 var onChange = function () {
-	var selectedValue = document.getElementById('asd').value;
+	var selectedValue = document.getElementById('gradeSelect').value;
 	var eval = datas[selectedValue];
 	React.render(
 	  <GradeBox data={eval} />,
@@ -250,9 +250,12 @@ var SelectTest = React.createClass({
       );
     });
     return (
-      <select id="asd" className="gradeList" onChange={this.valueChanged}>
+	  <div className="form-group">
+      <label for="gradeSelect">Nome da Coluna</label>
+      <select id="gradeSelect" className="gradeList form-control" onChange={this.valueChanged}>
         {optionNodes}
       </select>
+      </div>
     );
   },
   changed: function() {
@@ -277,12 +280,13 @@ React.render(
 );
 }
 </script>
-
+<div class="col-md-8">
 <form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}" enctype="multipart/form-data">
 	<div id="content" class="container"></div>
-	<button type="submit" class="btn btn-default">Submeter</button>
+	<p>
+	<button type="submit" class="btn btn-default">Submeter</button></p>
 </form:form>
-
+</div>
 </div>
 </div>
 </div>
