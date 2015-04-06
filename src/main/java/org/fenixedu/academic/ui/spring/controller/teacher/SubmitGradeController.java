@@ -41,10 +41,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.fenixedu.academic.domain.Evaluation;
 import org.fenixedu.academic.domain.Professorship;
+import org.fenixedu.academic.domain.accessControl.PersistentStudentGroup;
 import org.fenixedu.academic.service.services.exceptions.FenixServiceException;
 import org.fenixedu.academic.service.services.teacher.WriteMarks;
 import org.fenixedu.academic.service.services.teacher.WriteMarks.StudentMark;
 import org.fenixedu.academic.ui.struts.action.teacher.ManageExecutionCourseDA;
+import org.fenixedu.bennu.core.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -129,6 +131,38 @@ public class SubmitGradeController extends ExecutionCourseController {
         }
     }
 
+    String checkStudentGradePair(String student, String grade) {
+        if (!checkStudent(student)) {
+            return "No such student" + student;
+        }
+        if (!checkGrade(grade)) {
+            return "BAT GRADE!" + grade;
+        }
+        return null;
+    }
+
+    boolean checkStudent(String student) {
+        User user = User.findByUsername(student);
+        if (user == null) {
+            return false;
+        }
+        boolean exists = false;
+        user.getPerson().getStudent();
+        for (PersistentStudentGroup psg : executionCourse.getStudentGroupSet()) {
+            if (psg.getMembers().contains(user)) {
+                exists = true;
+            }
+        }
+        return exists;
+    }
+
+    boolean checkGrade(String mark) {
+        if (mark.trim().isEmpty()) {
+            return true;
+        }
+        return evaluation.getGradeScale().belongsTo(mark);
+    }
+
     private String getNextToken(StringTokenizer stringTokenizer) {
         while (stringTokenizer.hasMoreTokens()) {
             String token = stringTokenizer.nextToken().trim();
@@ -194,9 +228,10 @@ public class SubmitGradeController extends ExecutionCourseController {
     @RequestMapping(value = "/submitGradeFileExcel", method = RequestMethod.POST)
     public String submitGradesExcel(Model model, @ModelAttribute("gradeBean") @Validated SubmitGradeBean gradeFileBean,
             BindingResult bindingResult, HttpSession session, HttpServletRequest request) {
-        JsonElement fileAsStrings = processExcelMarks(gradeFileBean);
+        List<String> errors = new ArrayList<String>();
+        JsonElement fileAsStrings = processExcelMarks(gradeFileBean, errors);
 
-        //gradeFileBean.setMarks(marks);
+        model.addAttribute("errors", errors);
         model.addAttribute("excelRepresent", fileAsStrings.toString());
         model.addAttribute("gradeBean", gradeFileBean);
         model.addAttribute("executionCourse", executionCourse);
@@ -206,7 +241,7 @@ public class SubmitGradeController extends ExecutionCourseController {
         return "teacher/selectMarks";
     }
 
-    private JsonElement processExcelMarks(SubmitGradeBean gradeFileBean) {
+    private JsonElement processExcelMarks(SubmitGradeBean gradeFileBean, List<String> errors) {
         JsonObject MapOfMaps = new JsonObject();
         try {
             InputStream inp = gradeFileBean.getGradeFile().getInputStream();
@@ -218,7 +253,14 @@ public class SubmitGradeController extends ExecutionCourseController {
                 JsonObject StudentToGrade = new JsonObject();
                 for (int i = 1; i < sheet.getLastRowNum(); i++) {
                     Row row = sheet.getRow(i);
-                    StudentToGrade.addProperty(getCellStringValue(row.getCell(0)), getCellStringValue(row.getCell(titles)));
+                    String student = getCellStringValue(row.getCell(0));
+                    String grade = getCellStringValue(row.getCell(titles));
+                    String error = checkStudentGradePair(student, grade);
+                    if (error == null) {
+                        StudentToGrade.addProperty(student, grade);
+                    } else {
+                        errors.add(error);
+                    }
                 }
                 MapOfMaps.add(getCellStringValue(titleRow.getCell(titles)), StudentToGrade);
             }

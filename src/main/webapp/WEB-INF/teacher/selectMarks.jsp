@@ -71,6 +71,12 @@ ${portal.toolkit()}
 		<p><b><spring:message code="label.marksOnline.currentGradeScale"/></b> ${gradeScaleDescription}</p>
 	</c:if>
 </div>
+<c:if test="${not empty errors}">
+	<div class="alert alert-error" role="alert">
+	${errors}
+	</div>
+</c:if>
+
 <spring:url var="formActionUrl" value="${action}"/>
 
 <script>
@@ -284,7 +290,8 @@ React.render(
 <form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}" enctype="multipart/form-data">
 	<div id="content" class="container"></div>
 	<p>
-	<button type="submit" class="btn btn-default">Submeter</button></p>
+		<button type="submit" class="btn btn-default">Submeter</button>
+	</p>
 </form:form>
 </div>
 </div>
