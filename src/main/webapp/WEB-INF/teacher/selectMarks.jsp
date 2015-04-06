@@ -75,6 +75,14 @@ ${portal.toolkit()}
 	<div class="alert alert-error" role="alert">
 	${errors}
 	</div>
+	<spring:url var="resubmitUrl" value="${actionResubmit}"/>
+	<form:form modelAttribute="gradeBean" role="form" method="post" action="${resubmitUrl}" enctype="multipart/form-data">
+	<div class="form-group">
+		<form:label for="gradeFile" path="gradeFile"><spring:message code="label.file"/></form:label>
+		<form:input type="file" id="gradeFile" path="gradeFile" name="gradeFile"></form:input>
+	</div>
+	<input type="submit" class="btn btn-default">
+</form:form>
 </c:if>
 
 <spring:url var="formActionUrl" value="${action}"/>

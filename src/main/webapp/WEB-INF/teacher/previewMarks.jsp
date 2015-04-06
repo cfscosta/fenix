@@ -53,13 +53,28 @@
 		<p><b><spring:message code="label.marksOnline.currentGradeScale"/></b> ${gradeScaleDescription}</p>
 	</c:if>
 </div>
-<spring:url var="formActionUrl" value="${action}"/>
 
+<c:if test="${not empty errors}">
+	<div class="alert alert-error" role="alert">
+	${errors}
+	</div>
+	
+<spring:url var="resubmitUrl" value="${actionResubmit}"/>txt
+<form:form modelAttribute="gradeBean" role="form" method="post" action="${resubmitUrl}" enctype="multipart/form-data">
+	<div class="form-group">
+		<form:label for="gradeFile" path="gradeFile"><spring:message code="label.file"/></form:label>
+		<form:input type="file" id="gradeFile" path="gradeFile" name="gradeFile"></form:input>
+	</div>
+	<input type="submit" class="btn btn-default">
+</form:form>
+	
+</c:if>
+<c:if test="${empty errors}">
+<spring:url var="formActionUrl" value="${actionSubmit}"/>
 <div class="row">
 	<div class="col-md-3">Username</div>
 	<div class="col-md-3">Nota</div>
 </div>
-
 <form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}" enctype="multipart/form-data">
 	<c:forEach var="mark" items="${gradeBean.marks}">
 		<div class="row">
@@ -70,5 +85,6 @@
 	</c:forEach>
 	<button type="submit" class="btn btn-default">Submeter</button>
 </form:form>
+</c:if>
 </div>
 </div>

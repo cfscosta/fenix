@@ -99,7 +99,7 @@ public class SubmitGradeController extends ExecutionCourseController {
         return prof.getPermissions().getGroups();
     }
 
-    private Map<String, String> loadMarks(final InputStream inputStream) throws IOException {
+    private Map<String, String> loadMarks(final InputStream inputStream, List<String> errors) throws IOException {
         final Map<String, String> marks = new HashMap<String, String>();
 
         final InputStreamReader input = new InputStreamReader(inputStream);
@@ -124,7 +124,12 @@ public class SubmitGradeController extends ExecutionCourseController {
                 if (mark == null) {
                     throw new Exception();
                 }
-                marks.put(studentNumber, mark);
+                String error = checkStudentGradePair(studentNumber, mark);
+                if (error == null) {
+                    marks.put(studentNumber, mark);
+                } else {
+                    errors.add(error);
+                }
             }
         } catch (Exception e) {
             throw new IOException("error.file.badFormat");
@@ -173,13 +178,13 @@ public class SubmitGradeController extends ExecutionCourseController {
         return null;
     }
 
-    public Map<String, String> loadMarks(SubmitGradeBean gradeFileBean) {
+    public Map<String, String> loadMarks(SubmitGradeBean gradeFileBean, List<String> errors) {
 
         final MultipartFile fileItem = gradeFileBean.getGradeFile();
         InputStream inputStream = null;
         try {
             inputStream = fileItem.getInputStream();
-            final Map<String, String> marks = loadMarks(inputStream);
+            final Map<String, String> marks = loadMarks(inputStream, errors);
             return marks;
             //WriteMarks.writeByStudent(executionCourse.getExternalId(), evaluation.getExternalId(), buildStudentMarks(marks));
         } catch (IOException e) {
@@ -232,12 +237,15 @@ public class SubmitGradeController extends ExecutionCourseController {
         JsonElement fileAsStrings = processExcelMarks(gradeFileBean, errors);
 
         model.addAttribute("errors", errors);
+        model.addAttribute("actionResubmit",
+                "/teacher/evaluation/" + executionCourse.getExternalId() + "/" + evaluation.getExternalId()
+                        + "/submitGradeFileExcel");
         model.addAttribute("excelRepresent", fileAsStrings.toString());
         model.addAttribute("gradeBean", gradeFileBean);
         model.addAttribute("executionCourse", executionCourse);
         model.addAttribute("evaluation", evaluation);
-        model.addAttribute("action", "/teacher/evaluation/" + executionCourse.getExternalId() + "/" + evaluation.getExternalId()
-                + "/submitVerified");
+        model.addAttribute("actionSubmit",
+                "/teacher/evaluation/" + executionCourse.getExternalId() + "/" + evaluation.getExternalId() + "/submitVerified");
         return "teacher/selectMarks";
     }
 
@@ -298,14 +306,19 @@ public class SubmitGradeController extends ExecutionCourseController {
     @RequestMapping(value = "/submitGradeFileTXT", method = RequestMethod.POST)
     public String submitGradesTXT(Model model, @ModelAttribute("gradeBean") @Validated SubmitGradeBean gradeFileBean,
             BindingResult bindingResult, HttpSession session, HttpServletRequest request) {
-        Map<String, String> marks = loadMarks(gradeFileBean);
+        List<String> errors = new ArrayList<>();
+        Map<String, String> marks = loadMarks(gradeFileBean, errors);
 
         gradeFileBean.setMarks(marks);
         model.addAttribute("gradeBean", gradeFileBean);
+        model.addAttribute("errors", errors);
+        model.addAttribute("actionResubmit",
+                "/teacher/evaluation/" + executionCourse.getExternalId() + "/" + evaluation.getExternalId()
+                        + "/submitGradeFileTXT");
         model.addAttribute("executionCourse", executionCourse);
         model.addAttribute("evaluation", evaluation);
-        model.addAttribute("action", "/teacher/evaluation/" + executionCourse.getExternalId() + "/" + evaluation.getExternalId()
-                + "/submitVerified");
+        model.addAttribute("actionSubmit",
+                "/teacher/evaluation/" + executionCourse.getExternalId() + "/" + evaluation.getExternalId() + "/submitVerified");
         return "teacher/previewMarks";
     }
 
