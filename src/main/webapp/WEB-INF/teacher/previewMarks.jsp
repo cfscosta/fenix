@@ -24,6 +24,19 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
+<style>
+.input-md {
+	height: 25px;
+	padding: 10px 16px;
+}
+
+.limit-length {
+	max-height: 300px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+</style>
+
 <spring:url var="searchUrl" value="/spaces-view/search/"/>
 <jsp:include page="/teacher/evaluation/evaluationMenu.jsp" />
 <h2><spring:message code="title.evaluation.manage.marksListWithFile"/></h2>
@@ -54,37 +67,46 @@
 	</c:if>
 </div>
 
-<c:if test="${not empty errors}">
-	<div class="alert alert-error" role="alert">
-	${errors}
-	</div>
-	
 <spring:url var="resubmitUrl" value="${actionResubmit}"/>txt
-<form:form modelAttribute="gradeBean" role="form" method="post" action="${resubmitUrl}" enctype="multipart/form-data">
+<c:if test="${not empty errors}">
+	<div class="alert alert-warning" role="alert">
+	Foram detectados os seguintes erros no ficheiro submetido:
+	<ul class="limit-length">
+	<c:forEach var="error" items="${errors}">
+		<li>${error}</li>
+	</c:forEach> 
+	</ul>
+	</div>
+
+	<form:form modelAttribute="gradeBean" role="form" method="post" action="${resubmitUrl}" enctype="multipart/form-data">
 	<div class="form-group">
 		<form:label for="gradeFile" path="gradeFile"><spring:message code="label.file"/></form:label>
 		<form:input type="file" id="gradeFile" path="gradeFile" name="gradeFile"></form:input>
 	</div>
 	<input type="submit" class="btn btn-default">
 </form:form>
-	
 </c:if>
+
 <c:if test="${empty errors}">
+<div class="col-md-8">
 <spring:url var="formActionUrl" value="${actionSubmit}"/>
 <div class="row">
-	<div class="col-md-3">Username</div>
-	<div class="col-md-3">Nota</div>
+	<div class="col-md-6 input-md col-xs-6">Username</div>
+	<div class="col-md-6 input-md col-xs-6">Nota</div>
 </div>
 <form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}" enctype="multipart/form-data">
+	<div class="limit-length">
 	<c:forEach var="mark" items="${gradeBean.marks}">
 		<div class="row">
-			<div class="col-md-3">${mark.key}</div>
-			<div class="col-md-3">${mark.value}</div>
+			<div class="col-md-6 input-md col-xs-6">${mark.key}</div>
+			<div class="col-md-6 input-md col-xs-6">${mark.value}</div>
 			<form:input type="hidden" path="marks['${mark.key}']" value="${mark.value}"/>
 		</div>
 	</c:forEach>
+	</div>
 	<button type="submit" class="btn btn-default">Submeter</button>
 </form:form>
+</div>
 </c:if>
 </div>
 </div>

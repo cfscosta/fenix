@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -236,7 +237,7 @@ public class SubmitGradeController extends ExecutionCourseController {
         List<String> errors = new ArrayList<String>();
         JsonElement fileAsStrings = processExcelMarks(gradeFileBean, errors);
 
-        model.addAttribute("errors", errors);
+        model.addAttribute("errors", errors.stream().distinct().collect(Collectors.toList()));
         model.addAttribute("actionResubmit",
                 "/teacher/evaluation/" + executionCourse.getExternalId() + "/" + evaluation.getExternalId()
                         + "/submitGradeFileExcel");
@@ -311,7 +312,7 @@ public class SubmitGradeController extends ExecutionCourseController {
 
         gradeFileBean.setMarks(marks);
         model.addAttribute("gradeBean", gradeFileBean);
-        model.addAttribute("errors", errors);
+        model.addAttribute("errors", errors.stream().distinct().collect(Collectors.toList()));
         model.addAttribute("actionResubmit",
                 "/teacher/evaluation/" + executionCourse.getExternalId() + "/" + evaluation.getExternalId()
                         + "/submitGradeFileTXT");

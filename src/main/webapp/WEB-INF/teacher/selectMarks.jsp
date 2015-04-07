@@ -71,11 +71,17 @@ ${portal.toolkit()}
 		<p><b><spring:message code="label.marksOnline.currentGradeScale"/></b> ${gradeScaleDescription}</p>
 	</c:if>
 </div>
+<spring:url var="resubmitUrl" value="${actionResubmit}"/>
 <c:if test="${not empty errors}">
-	<div class="alert alert-error" role="alert">
-	${errors}
+	<div class="alert alert-warning" role="alert">
+	Foram detectados os seguintes erros no ficheiro submetido:
+	<ul class="limit-length">
+	<c:forEach var="error" items="${errors}">
+		<li>${error}</li>
+	</c:forEach> 
+	</ul>
 	</div>
-	<spring:url var="resubmitUrl" value="${actionResubmit}"/>
+
 	<form:form modelAttribute="gradeBean" role="form" method="post" action="${resubmitUrl}" enctype="multipart/form-data">
 	<div class="form-group">
 		<form:label for="gradeFile" path="gradeFile"><spring:message code="label.file"/></form:label>
@@ -85,6 +91,7 @@ ${portal.toolkit()}
 </form:form>
 </c:if>
 
+<c:if test="${empty errors}">
 <spring:url var="formActionUrl" value="${action}"/>
 
 <script>
@@ -302,6 +309,7 @@ React.render(
 	</p>
 </form:form>
 </div>
+</c:if>
 </div>
 </div>
 </div>
