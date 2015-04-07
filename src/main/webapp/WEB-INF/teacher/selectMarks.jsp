@@ -74,12 +74,14 @@ ${portal.toolkit()}
 <spring:url var="resubmitUrl" value="${actionResubmit}"/>
 <c:if test="${not empty errors}">
 	<div class="alert alert-warning" role="alert">
-	Foram detectados os seguintes erros no ficheiro submetido:
+	<spring:message code="label.fileUpload.problemsDetected"/>
 	<ul class="limit-length">
 	<c:forEach var="error" items="${errors}">
 		<li>${error}</li>
 	</c:forEach> 
 	</ul>
+	<br>
+	<spring:message code="label.fileUpload.resubmitFile"/>
 	</div>
 
 	<form:form modelAttribute="gradeBean" role="form" method="post" action="${resubmitUrl}" enctype="multipart/form-data">
@@ -87,7 +89,7 @@ ${portal.toolkit()}
 		<form:label for="gradeFile" path="gradeFile"><spring:message code="label.file"/></form:label>
 		<form:input type="file" id="gradeFile" path="gradeFile" name="gradeFile"></form:input>
 	</div>
-	<input type="submit" class="btn btn-default">
+	<button type="submit" class="btn btn-default"><spring:message code="label.fileUpload.submit"/></button>
 </form:form>
 </c:if>
 
@@ -223,8 +225,8 @@ var GradeList = React.createClass({
     return (
 	  <div>
 	  <div className="row">
-		<div className="col-md-6 col-xs-6">Student</div>
-		<div className="col-md-6 col-xs-6">Grade</div>
+        <div className="col-md-6 col-xs-6"><spring:message code="label.fileUpload.preview.username"/></div>
+	    <div className="col-md-6 col-xs-6"><spring:message code="label.fileUpload.preview.grade"/></div>
 	  </div>
 	  <div className="limit-length">
         {gradeNodes}
@@ -272,7 +274,7 @@ var SelectTest = React.createClass({
     });
     return (
 	  <div className="form-group">
-      <label for="gradeSelect">Nome da Coluna</label>
+      <label for="gradeSelect"><spring:message code="label.fileUpload.preview.selectColumn"/></label>
       <select id="gradeSelect" className="gradeList form-control" onChange={this.valueChanged}>
         {optionNodes}
       </select>
@@ -305,7 +307,7 @@ React.render(
 <form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}" enctype="multipart/form-data">
 	<div id="content" class="container"></div>
 	<p>
-		<button type="submit" class="btn btn-default">Submeter</button>
+		<button type="submit" class="btn btn-default"><spring:message code="label.fileUpload.submit"/></button>
 	</p>
 </form:form>
 </div>

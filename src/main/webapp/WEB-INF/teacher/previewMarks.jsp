@@ -67,15 +67,17 @@
 	</c:if>
 </div>
 
-<spring:url var="resubmitUrl" value="${actionResubmit}"/>txt
+<spring:url var="resubmitUrl" value="${actionResubmit}"/>
 <c:if test="${not empty errors}">
 	<div class="alert alert-warning" role="alert">
-	Foram detectados os seguintes erros no ficheiro submetido:
+	<spring:message code="label.fileUpload.problemsDetected"/>
 	<ul class="limit-length">
-	<c:forEach var="error" items="${errors}">
-		<li>${error}</li>
-	</c:forEach> 
+		<c:forEach var="error" items="${errors}">
+			<li>${error}</li>
+		</c:forEach> 
 	</ul>
+	<br>
+	<spring:message code="label.fileUpload.resubmitFile"/>
 	</div>
 
 	<form:form modelAttribute="gradeBean" role="form" method="post" action="${resubmitUrl}" enctype="multipart/form-data">
@@ -83,7 +85,7 @@
 		<form:label for="gradeFile" path="gradeFile"><spring:message code="label.file"/></form:label>
 		<form:input type="file" id="gradeFile" path="gradeFile" name="gradeFile"></form:input>
 	</div>
-	<input type="submit" class="btn btn-default">
+	<button type="submit" class="btn btn-default"><spring:message code="label.fileUpload.submit"/></button>
 </form:form>
 </c:if>
 
@@ -91,8 +93,8 @@
 <div class="col-md-8">
 <spring:url var="formActionUrl" value="${actionSubmit}"/>
 <div class="row">
-	<div class="col-md-6 input-md col-xs-6">Username</div>
-	<div class="col-md-6 input-md col-xs-6">Nota</div>
+	<div class="col-md-6 col-xs-6"><spring:message code="label.fileUpload.preview.username"/></div>
+	<div class="col-md-6 col-xs-6"><spring:message code="label.fileUpload.preview.grade"/></div>
 </div>
 <form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}" enctype="multipart/form-data">
 	<div class="limit-length">
@@ -104,7 +106,7 @@
 		</div>
 	</c:forEach>
 	</div>
-	<button type="submit" class="btn btn-default">Submeter</button>
+	<button type="submit" class="btn btn-default"><spring:message code="label.fileUpload.submit"/></button>
 </form:form>
 </div>
 </c:if>
