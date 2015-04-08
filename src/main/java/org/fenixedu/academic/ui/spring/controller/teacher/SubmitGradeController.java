@@ -47,7 +47,9 @@ import org.fenixedu.academic.service.services.exceptions.FenixServiceException;
 import org.fenixedu.academic.service.services.teacher.WriteMarks;
 import org.fenixedu.academic.service.services.teacher.WriteMarks.StudentMark;
 import org.fenixedu.academic.ui.struts.action.teacher.ManageExecutionCourseDA;
+import org.fenixedu.academic.util.Bundle;
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -138,11 +140,12 @@ public class SubmitGradeController extends ExecutionCourseController {
     }
 
     String checkStudentGradePair(String student, String grade) {
-        if (!checkStudent(student)) {
-            return "No such student" + student;
+        List<String> errors = WriteMarks.verifyStudent(executionCourse, student);
+        if (errors != null && errors.size() > 0) {
+            return errors.stream().collect(Collectors.joining("\n"));
         }
         if (!checkGrade(grade)) {
-            return "BAT GRADE!" + grade;
+            return BundleUtil.getString(Bundle.APPLICATION, "errors.invalidMark", grade, student);
         }
         return null;
     }
@@ -187,10 +190,8 @@ public class SubmitGradeController extends ExecutionCourseController {
             inputStream = fileItem.getInputStream();
             final Map<String, String> marks = loadMarks(inputStream, errors);
             return marks;
-            //WriteMarks.writeByStudent(executionCourse.getExternalId(), evaluation.getExternalId(), buildStudentMarks(marks));
         } catch (IOException e) {
             e.printStackTrace();
-            //addErrorMessage(BundleUtil.getString(Bundle.APPLICATION, e.getMessage()));
             return null;
         } finally {
             if (inputStream != null) {
@@ -260,7 +261,7 @@ public class SubmitGradeController extends ExecutionCourseController {
             Row titleRow = sheet.getRow(0);
             for (int titles = 1; titles < titleRow.getLastCellNum(); titles++) {
                 JsonObject StudentToGrade = new JsonObject();
-                for (int i = 1; i < sheet.getLastRowNum(); i++) {
+                for (int i = 1; i < sheet.getLastRowNum() + 1; i++) {
                     Row row = sheet.getRow(i);
                     String student = getCellStringValue(row.getCell(0));
                     String grade = getCellStringValue(row.getCell(titles));
@@ -322,15 +323,5 @@ public class SubmitGradeController extends ExecutionCourseController {
                 "/teacher/evaluation/" + executionCourse.getExternalId() + "/" + evaluation.getExternalId() + "/submitVerified");
         return "teacher/previewMarks";
     }
-
-//    private boolean isExcelFile(MultipartFile gradeFile) {
-//        if (gradeFile.getContentType().contains("excel")) {
-//            return true;
-//        }
-//        if (gradeFile.getContentType().contains("sheet")) {
-//            return true;
-//        }
-//        return false;
-//    }
 
 }

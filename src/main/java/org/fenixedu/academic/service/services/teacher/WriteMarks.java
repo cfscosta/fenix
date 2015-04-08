@@ -21,6 +21,7 @@ package org.fenixedu.academic.service.services.teacher;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.fenixedu.academic.domain.Attends;
 import org.fenixedu.academic.domain.Evaluation;
@@ -88,6 +89,15 @@ public class WriteMarks {
         } else {
             result.add(new AttendsMark(attend.getExternalId(), studentMark.mark));
         }
+    }
+
+    public static List<String> verifyStudent(final ExecutionCourse executionCourse, final String studentNumber) {
+        List<DomainException> eList = new ArrayList<>();
+        findAttend(executionCourse, studentNumber, eList);
+        if (eList.size() > 0) {
+            return eList.stream().map(e -> e.getLocalizedMessage()).collect(Collectors.toList());
+        }
+        return null;
     }
 
     private static Attends findAttend(final ExecutionCourse executionCourse, final String studentNumber,

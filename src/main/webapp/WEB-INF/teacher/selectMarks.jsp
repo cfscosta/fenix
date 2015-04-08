@@ -94,7 +94,6 @@ ${portal.toolkit()}
 </c:if>
 
 <c:if test="${empty errors}">
-<spring:url var="formActionUrl" value="${action}"/>
 
 <script>
 if (!Object.keys) {
@@ -304,6 +303,7 @@ React.render(
 }
 </script>
 <div class="col-md-8">
+<spring:url var="formActionUrl" value="${actionSubmit}"/>
 <form:form modelAttribute="gradeBean" role="form" method="post" action="${formActionUrl}" enctype="multipart/form-data">
 	<div id="content" class="container"></div>
 	<p>
