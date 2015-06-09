@@ -199,6 +199,14 @@
 	            <fr:property name="sortUrl" value='<%= "/caseHandling" + processName.toString() + ".do?method=intro&amp;processId=" + processId.toString() + "&amp;executionIntervalId=" + executionIntervalId.toString() %>'/>
     	        <fr:property name="sortBy" value="<%= request.getParameter("sortBy") == null ? "candidacyState,candidacyDate=desc" : request.getParameter("sortBy") %>"/>
 			</fr:layout>
+			<fr:layout name="tabular-sortable">
+				<fr:property name="classes" value="tstyle4 thcenter thcenter thcenter"/>
+				<fr:property name="columnClasses" value="tdcenter, tdcenter, tdcenter, "/>
+				<fr:property name="module(moveProcess)" value=""/>
+				<fr:property name="linkFormat(moveProcess)" value='<%= "/candidacies/moveCandidate/${externalId}"%>' />
+				<fr:property name="key(moveProcess)" value="label.candidacy.move.candidate"/>
+				<fr:property name="bundle(moveProcess)" value="APPLICATION_RESOURCES"/>
+			</fr:layout>
 		</fr:view>
 		<bean:size id="childProcessesSize" name="childProcesses" />
 		<em>(<bean:message key="label.Total" bundle="APPLICATION_RESOURCES" />: <strong><bean:write name="childProcessesSize" /></strong>)</em>

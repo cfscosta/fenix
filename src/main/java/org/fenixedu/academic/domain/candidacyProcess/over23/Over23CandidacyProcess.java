@@ -78,11 +78,11 @@ public class Over23CandidacyProcess extends Over23CandidacyProcess_Base {
         super();
     }
 
-    private Over23CandidacyProcess(final ExecutionYear executionYear, final DateTime start, final DateTime end) {
+    private Over23CandidacyProcess(final ExecutionYear executionYear, final DateTime start, final DateTime end, final String name) {
         this();
         checkParameters(executionYear, start, end);
         setState(CandidacyProcessState.STAND_BY);
-        new Over23CandidacyPeriod(this, executionYear, start, end);
+        new Over23CandidacyPeriod(this, executionYear, start, end, name);
     }
 
     private void checkParameters(final ExecutionInterval executionInterval, final DateTime start, final DateTime end) {
@@ -159,7 +159,7 @@ public class Over23CandidacyProcess extends Over23CandidacyProcess_Base {
         @Override
         protected Over23CandidacyProcess executeActivity(Over23CandidacyProcess process, User userView, Object object) {
             final CandidacyProcessBean bean = (CandidacyProcessBean) object;
-            return new Over23CandidacyProcess((ExecutionYear) bean.getExecutionInterval(), bean.getStart(), bean.getEnd());
+            return new Over23CandidacyProcess((ExecutionYear) bean.getExecutionInterval(), bean.getStart(), bean.getEnd(), bean.getName());
         }
     }
 

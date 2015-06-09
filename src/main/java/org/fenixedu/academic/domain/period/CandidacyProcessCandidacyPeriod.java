@@ -47,6 +47,16 @@ abstract public class CandidacyProcessCandidacyPeriod extends CandidacyProcessCa
         return false;
     }
 
+    @Override
+    public String getPresentationName() {
+        String presentationName = "";
+        if (getName() != null && !getName().isEmpty()) {
+            presentationName += getName() + " - ";
+        }
+        presentationName += super.getPresentationName();
+        return presentationName;
+    }
+
     public List<CandidacyProcess> getCandidacyProcesses(final Class<? extends CandidacyProcess> clazz) {
         final List<CandidacyProcess> result = new ArrayList<CandidacyProcess>();
         for (final CandidacyProcess process : getCandidacyProcessesSet()) {

@@ -3438,6 +3438,7 @@ class period.CandidacyPeriod  {
     DateTime end;
 }
     class period.CandidacyProcessCandidacyPeriod extends period.CandidacyPeriod {
+        String name;
     } 
 
         class period.Over23CandidacyPeriod extends period.CandidacyProcessCandidacyPeriod {
